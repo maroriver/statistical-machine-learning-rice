@@ -1,0 +1,20 @@
+{
+  "dataset": "UCI Rice (Cammeo and Osmancik)",
+  "dataset_doi": "10.24432/C5MW4Z",
+  "data_origin": "https://archive.ics.uci.edu/static/public/545/rice%2Bcammeo%2Band%2Bosmancik.zip",
+  "sha256_arff": "1af97883100c89de2ea2972f7a28d428f4f1c14711a61defc0b0569e9eb65665",
+  "raw_rows": 3810,
+  "duplicate_rows_removed": 0,
+  "rows_analyzed": 3810,
+  "train_rows": 3048,
+  "test_rows": 762,
+  "selected_model_from_training_cv": "Logistic Regression",
+  "random_state": 42,
+  "test_evaluated_once": true,
+  "versions": {
+    "python": "3.13.16",
+    "numpy": "2.1.3",
+    "pandas": "2.2.3",
+    "scikit_learn": "1.6.1"
+  }
+}

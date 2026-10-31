@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "Jika menggunakan kode pendamping buku ini, harap kutip repositori dan dataset UCI yang tercantum di README."
+title: "Statistical Machine Learning Bab 10: Klasifikasi Varietas Beras Rice"
+authors:
+  - family-names: Budiasto
+    given-names: Jarot
+version: 1.0.0
+date-released: 2026-10-31
+type: software
+license: MIT

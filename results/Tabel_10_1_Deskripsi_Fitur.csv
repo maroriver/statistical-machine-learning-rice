@@ -1,0 +1,9 @@
+Variabel,Keterangan,Satuan atau skala
+Area,Luas butir beras di dalam batas objek,piksel
+Perimeter,Keliling batas butir beras,piksel
+Major_Axis_Length,Panjang sumbu utama bentuk butir,satuan panjang pada citra
+Minor_Axis_Length,Panjang sumbu minor bentuk butir,satuan panjang pada citra
+Eccentricity,Ukuran kelonjongan elips yang mewakili butir,tanpa satuan
+Convex_Area,Luas selubung cembung butir,piksel
+Extent,Rasio luas butir terhadap kotak pembatas,tanpa satuan
+Class,Label target varietas: Cammeo atau Osmancik,kategori

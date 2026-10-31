@@ -1,0 +1,6 @@
+# Tiga pustaka inti sesuai metadata eksekusi Bab 10; bukan freeze lengkap lingkungan.
+numpy==2.1.3
+pandas==2.2.3
+scikit-learn==1.6.1
+scipy>=1.13,<2
+matplotlib>=3.8,<4
