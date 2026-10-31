@@ -1,75 +1,149 @@
-# Statistical Machine Learning — Bab 10 (UCI Rice)
+# Statistical Machine Learning — Bab 10: Klasifikasi Varietas Beras
 
-Kode pendamping buku **Statistical Machine Learning**, Bab 10: *Studi Kasus dan Implementasi Statistical Machine Learning*.
+**Kode dan materi praktik pendamping buku _Statistical Machine Learning_, Bab 10: “Studi Kasus dan Implementasi Statistical Machine Learning”.**
 
-Eksperimen pembelajaran mengklasifikasikan dua varietas beras, **Cammeo** dan **Osmancik**, berdasarkan tujuh fitur numerik dari citra butir beras. Ini **bukan** model pengenal gambar mentah atau aplikasi siap produksi. Target pembacanya adalah pemula.
+Repositori ini menyediakan eksperimen klasifikasi dua varietas beras, **Cammeo** dan **Osmancik**, menggunakan Python dan Google Colab. Materi disusun untuk pembaca pemula: mulai dari memahami data, membuat model, hingga membaca hasil evaluasinya.
 
-## Mulai dari sini
+**Penulis:** Ir. Jarot Budiasto, S.T., M.T. — Universitas Musamus, Merauke, Indonesia.
 
-1. Buka [Google Colab](https://colab.research.google.com/).
-2. Pilih **File → Open notebook → GitHub**, lalu cari repositori ini setelah dipublikasikan; atau unggah [`notebooks/Bab10_Rice_Statistical_ML.ipynb`](notebooks/Bab10_Rice_Statistical_ML.ipynb).
-3. Gunakan runtime **CPU** dan pilih **Runtime → Run all**.
-4. Notebook mengambil dataset langsung dari UCI dan menghasilkan ZIP berisi tabel, grafik, serta metadata pada folder kerja Colab.
+[![Buka di Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maroriver/statistical-machine-learning-rice/blob/main/notebooks/Bab10_Rice_Statistical_ML.ipynb)
 
-**Tautan satu klik Open in Colab:** setelah mengunggah repositori, gunakan pola berikut:
+**Tautan utama:** [Notebook Google Colab](https://colab.research.google.com/github/maroriver/statistical-machine-learning-rice/blob/main/notebooks/Bab10_Rice_Statistical_ML.ipynb) · [Notebook di GitHub](notebooks/Bab10_Rice_Statistical_ML.ipynb) · [Dataset resmi UCI](https://archive.ics.uci.edu/dataset/545/rice)
 
-```text
-https://colab.research.google.com/github/maroriver/statistical-machine-learning-rice/blob/main/notebooks/Bab10_Rice_Statistical_ML.ipynb
+> **Catatan:** Contoh ini mengklasifikasikan *fitur morfologi numerik* yang sudah diekstraksi dari citra beras. Notebook **tidak** menerima gambar mentah sebagai masukan dan **bukan** sistem klasifikasi siap pakai untuk industri.
+
+## 1. Tujuan pembelajaran
+
+Setelah mengikuti notebook, pembaca diharapkan mampu:
+
+1. mengenali variabel, kelas target, dan statistik deskriptif suatu dataset;
+2. memeriksa kualitas data serta membagi data pelatihan dan pengujian;
+3. melatih tiga algoritma klasifikasi sederhana menggunakan `scikit-learn`;
+4. memahami standardisasi fitur dan alasan penggunaan `Pipeline`;
+5. membaca hasil validasi silang, *accuracy*, *precision*, *recall*, *Macro-F1*, serta *confusion matrix*; dan
+6. menafsirkan keterbatasan hasil prediksi secara proporsional.
+
+## 2. Cara menjalankan di Google Colab
+
+1. Klik tombol **Buka di Google Colab** di atas.
+2. Pastikan notebook yang terbuka bernama `Bab10_Rice_Statistical_ML.ipynb`.
+3. Pilih **Runtime → Change runtime type → CPU** jika diperlukan.
+4. Jalankan **Runtime → Run all** (atau **Jalankan semua**).
+5. Baca keluaran setiap tahap. Notebook akan mencoba mengambil dataset secara otomatis dari UCI dan membuat folder hasil serta arsip ZIP untuk disimpan.
+
+Tidak diperlukan instalasi Python di komputer pribadi. Apabila pengunduhan dataset mengalami kendala, unduh berkas `Rice_Cammeo_Osmancik.arff` atau ZIP dari [halaman UCI](https://archive.ics.uci.edu/dataset/545/rice), unggah ke lingkungan kerja Colab, lalu jalankan ulang sel pemuatan data sesuai petunjuk notebook.
+
+### Alternatif menjalankan secara lokal
+
+Jika Python sudah terpasang, unduh atau *clone* repositori ini, kemudian jalankan:
+
+```bash
+git clone https://github.com/maroriver/statistical-machine-learning-rice.git
+cd statistical-machine-learning-rice
+python -m pip install -r requirements.txt
+jupyter notebook notebooks/Bab10_Rice_Statistical_ML.ipynb
 ```
 
-Jangan mencetak URL sementara di atas dalam buku. Gunakan URL GitHub aktual atau permalink ke tag rilis `v1.0.0`.
+Perintah `jupyter notebook` memerlukan Jupyter yang terpasang secara terpisah jika belum tersedia. Untuk pembaca pemula, **Google Colab tetap menjadi pilihan yang dianjurkan**.
 
-## Metode dan hasil referensi
+## 3. Dataset dan rancangan eksperimen
 
-| Komponen | Konfigurasi / hasil acuan |
+Dataset [Rice (Cammeo and Osmancik)](https://archive.ics.uci.edu/dataset/545/rice) dari UCI Machine Learning Repository berisi **3.810 observasi**, **7 fitur numerik**, dan **2 kelas**. Fitur-fitur tersebut adalah `Area`, `Perimeter`, `Major_Axis_Length`, `Minor_Axis_Length`, `Eccentricity`, `Convex_Area`, dan `Extent`.
+
+| Komponen | Konfigurasi |
 |---|---|
-| Dataset | UCI Rice (Cammeo and Osmancik), 3.810 baris, 7 fitur |
-| Audit | 0 missing; 0 duplikasi identik; 0 konflik label |
-| Pembagian | Stratified 80:20 (`random_state=42`) → 3.048 train + 762 test |
-| Model | Logistic Regression, KNN (`k=5`), Decision Tree (`max_depth=4`) |
-| Validasi | Stratified 5-fold, training only; pilihan menurut CV Macro-F1 |
-| Model terpilih | Logistic Regression; CV Macro-F1 = **0,9317** |
-| Testing | Accuracy **0,9160**; Macro-F1 **0,9138**; 698 benar / 64 salah |
-| Confusion matrix | Aktual Cammeo: 288 benar + 38 salah; aktual Osmancik: 410 benar + 26 salah |
+| Pemeriksaan data | Tidak ditemukan nilai hilang, duplikasi identik, atau konflik label pada hasil audit |
+| Pembagian data | 80% pelatihan (3.048) dan 20% pengujian (762), terstratifikasi |
+| Reproduksibilitas | `random_state=42` |
+| Logistic Regression | `StandardScaler` + `LogisticRegression(max_iter=1500)` |
+| K-Nearest Neighbors (KNN) | `StandardScaler` + `KNeighborsClassifier(n_neighbors=5)` |
+| Decision Tree | `DecisionTreeClassifier(max_depth=4)` |
+| Validasi | `StratifiedKFold` 5 lipatan pada data pelatihan |
+| Pemilihan model | Rata-rata *Macro-F1* validasi silang tertinggi |
+| Evaluasi akhir | *Accuracy*, *precision*, *recall*, *Macro-F1*, dan *confusion matrix* pada data pengujian |
 
-Angka di atas berasal dari eksekusi **dataset asli** yang telah diaudit, bukan hasil baru yang dibuat saat paket ini disusun. Reproduksi pada mesin dan versi pustaka lain mungkin sedikit berbeda.
+Standardisasi dilakukan **di dalam `Pipeline`**, sehingga parameter standardisasi dipelajari dari data pelatihan, bukan dari data pengujian.
 
-## Struktur repositori
+## 4. Hasil eksperimen acuan
+
+Berikut adalah hasil **eksekusi terdahulu pada dataset UCI asli** yang telah diaudit dan digunakan di dalam Bab 10. Angka ini **bukan** hasil yang dihitung ulang ketika README disusun.
+
+| Algoritma | CV Macro-F1 | Akurasi pengujian | Macro-F1 pengujian | Kesalahan |
+|---|---:|---:|---:|---:|
+| **Logistic Regression** | **0,9317** | **91,60%** | **0,9138** | **64** |
+| K-Nearest Neighbors | 0,9250 | 90,94% | 0,9072 | 69 |
+| Decision Tree | 0,9221 | 91,21% | 0,9099 | 67 |
+
+**Logistic Regression dipilih berdasarkan hasil validasi silang pada data pelatihan**, bukan karena melihat hasil pengujian. Dari 762 observasi pengujian, model ini memprediksi **698 dengan benar dan 64 dengan salah**.
+
+*Confusion matrix* model terpilih (baris = kelas aktual; kolom = kelas prediksi):
+
+| Aktual \ Prediksi | Cammeo | Osmancik |
+|---|---:|---:|
+| Cammeo | 288 | 38 |
+| Osmancik | 26 | 410 |
+
+Perbedaan performa ketiga algoritma relatif kecil dan tidak membuktikan keunggulan universal satu algoritma. Nilai hasil dapat berubah jika data, pembagian sampel, atau lingkungan perangkat lunak berubah.
+
+## 5. Struktur berkas repositori
 
 ```text
-notebooks/                 Notebook Google Colab yang bisa dijalankan
-results/                   CSV/JSON keluaran referensi yang telah diaudit
-figures/                   Gambar 10.1–10.5 sesuai buku (10.3 ialah diagram alur editorial)
-data/                      Petunjuk sumber data; tidak ada dataset mentah dibundel
-docs/                      Peta tabel/gambar & petunjuk publikasi
-scripts/                   Pemeriksaan konsistensi hasil
-README.md                  Panduan pembaca
-requirements.txt           Dependensi Python
-requirements-reference.txt Versi pustaka inti pada eksekusi referensi
-CITATION.cff               Cara mengutip repositori pendamping
-LICENSE                    Lisensi MIT untuk kode asli repositori
+statistical-machine-learning-rice/
+├── README.md
+├── notebooks/
+│   └── Bab10_Rice_Statistical_ML.ipynb
+├── results/
+│   ├── Tabel_10_1_Deskripsi_Fitur.csv
+│   ├── Tabel_10_2_Audit_Dataset.csv
+│   ├── Tabel_10_3_Pembagian_Data.csv
+│   ├── Tabel_10_4_Hasil_Validasi_Silang.csv
+│   ├── Tabel_10_5_Perbandingan_Model_Test.csv
+│   ├── Tabel_10_6_Metrik_Per_Kelas.csv
+│   ├── Prediksi_Pengujian.csv
+│   └── Metadata_Eksperimen.json
+├── figures/
+│   └── Gambar_10_1 sampai Gambar_10_5 (.png)
+├── data/README.md
+├── docs/
+│   ├── BOOK_ALIGNMENT.md
+│   ├── FINAL_AUDIT.md
+│   └── PUBLISHING_CHECKLIST.md
+├── scripts/validate_repo.py
+├── requirements.txt
+├── requirements-reference.txt
+├── CITATION.cff
+└── LICENSE
 ```
 
-**Catatan penomoran:** notebook awal menyebut gambar validasi sebagai 10.3 dan *confusion matrix* sebagai 10.4. Versi GitHub memperbaikinya menjadi **Gambar 10.4** dan **Gambar 10.5**, sesuai buku. **Gambar 10.3** merupakan diagram alur penulis dan disertakan sebagai aset editorial. Nomor tabel juga diselaraskan dengan naskah cetak.
+Berkas di [`results/`](results/) merupakan keluaran acuan yang telah diaudit. Lima gambar dalam [`figures/`](figures/) mengikuti penomoran naskah buku. **Gambar 10.3 adalah diagram alur editorial**, sedangkan gambar lainnya berkaitan dengan visualisasi eksperimen. Detail pemetaan tersedia pada [`docs/BOOK_ALIGNMENT.md`](docs/BOOK_ALIGNMENT.md).
 
-## Sumber dan atribusi dataset
+## 6. Pemeriksaan hasil dan reproduksibilitas
 
-- **Rice (Cammeo and Osmancik)**, UCI Machine Learning Repository (2019), DOI [10.24432/C5MW4Z](https://doi.org/10.24432/C5MW4Z).
-- [Halaman resmi dataset](https://archive.ics.uci.edu/dataset/545/rice). Dataset berlisensi **CC BY 4.0**. Kode sumber repositori ini terpisah dan menggunakan **MIT License**.
-- Rekaman sumber data untuk hasil buku: SHA-256 berkas ARFF `1af97883100c89de2ea2972f7a28d428f4f1c14711a61defc0b0569e9eb65665`.
+Dari direktori utama repositori, jalankan:
 
-Tidak ada citra butir beras mentah atau file ARFF yang disertakan dalam repositori. Notebook mengambil data UCI saat dijalankan.
+```bash
+python scripts/validate_repo.py
+```
 
-## Reproduksibilitas
+Skrip ini **memeriksa konsistensi berkas hasil referensi**, termasuk metrik, prediksi individual, dan kelengkapan gambar/tabel. Skrip tersebut **tidak** melatih ulang model atau mengunduh ulang dataset. Untuk menjalankan ulang eksperimen, gunakan notebook Google Colab.
 
-- Python pada eksekusi referensi: **3.13.16**; NumPy **2.1.3**, pandas **2.2.3**, scikit-learn **1.6.1**. Versi SciPy dan Matplotlib eksekusi referensi tidak tersimpan pada metadata lama, sehingga tidak boleh diklaim sudah terkunci.
-- Jalankan `pip install -r requirements-reference.txt` bila ingin mendekati lingkungan referensi; pada Colab umumnya perpustakaan inti sudah tersedia.
-- Jalankan `python scripts/validate_repo.py` dari akar repositori untuk memeriksa angka referensi, matriks kebingungan, kelengkapan aset, dan konsistensi nama.
+Lingkungan yang tercatat pada eksekusi referensi: Python **3.13.16**, NumPy **2.1.3**, pandas **2.2.3**, dan scikit-learn **1.6.1**. Versi SciPy dan Matplotlib tidak tercatat lengkap pada metadata lama. Lihat [`requirements-reference.txt`](requirements-reference.txt) untuk pendekatan dependensi referensi; file tersebut bukan *environment lock* yang menjamin hasil identik di semua sistem.
 
-## Batasan
+## 7. Sumber data, lisensi, dan sitasi
 
-Satu pemisahan train–test dan lima lipatan CV pada training belum membuktikan kemampuan generalisasi pada kondisi akuisisi citra lain. Jangan mengubah model setelah meninjau hasil test lalu menganggap test yang sama sebagai evaluasi independen baru.
+**Dataset:** *Rice (Cammeo and Osmancik)* (2019), UCI Machine Learning Repository. DOI: [10.24432/C5MW4Z](https://doi.org/10.24432/C5MW4Z). Dataset dilisensikan dengan **Creative Commons Attribution 4.0 International (CC BY 4.0)** dan tetap memerlukan atribusi kepada sumber aslinya.
 
-## Sitasi
+**Kode repositori:** menggunakan [MIT License](LICENSE). Lisensi kode tidak menggantikan ketentuan lisensi dataset UCI. Data ARFF mentah dan citra asli tidak disertakan di repositori ini.
 
-Saat menggunakan notebook, kutip **repositori ini setelah dipublikasikan** dan juga dataset UCI (DOI di atas). Lihat `CITATION.cff`. Publikasi kode tidak mengubah lisensi dataset.
+Apabila menggunakan kode atau hasilnya dalam tugas, publikasi, atau bahan ajar, cantumkan sumber dataset UCI dan atribusi repositori ini. Metadata sitasi perangkat lunak tersedia di [`CITATION.cff`](CITATION.cff).
+
+**Repositori:** https://github.com/maroriver/statistical-machine-learning-rice
+
+## 8. Batasan penggunaan
+
+Eksperimen ini ditujukan untuk **pembelajaran**, bukan untuk mengesahkan varietas beras secara komersial. Hasil dari satu pembagian data pelatihan–pengujian dan satu dataset tidak menjamin kinerja yang sama pada varietas lain atau citra yang diambil menggunakan kondisi berbeda. Pembaca dianjurkan memahami kesalahan klasifikasi, tidak hanya membandingkan angka akurasi.
+
+---
+
+**Materi pendamping Bab 10 — _Statistical Machine Learning_**  
+Ir. Jarot Budiasto, S.T., M.T. · Universitas Musamus, Merauke, Indonesia
