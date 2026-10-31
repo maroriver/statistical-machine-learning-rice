@@ -11,10 +11,10 @@ Eksperimen pembelajaran mengklasifikasikan dua varietas beras, **Cammeo** dan **
 3. Gunakan runtime **CPU** dan pilih **Runtime → Run all**.
 4. Notebook mengambil dataset langsung dari UCI dan menghasilkan ZIP berisi tabel, grafik, serta metadata pada folder kerja Colab.
 
-**Tautan satu klik Open in Colab:** setelah mengunggah repositori, gunakan pola berikut (ganti `USERNAME` dengan nama pengguna GitHub sebenarnya):
+**Tautan satu klik Open in Colab:** setelah mengunggah repositori, gunakan pola berikut:
 
 ```text
-https://colab.research.google.com/github/USERNAME/statistical-machine-learning-bab10-rice/blob/main/notebooks/Bab10_Rice_Statistical_ML.ipynb
+https://colab.research.google.com/github/maroriver/statistical-machine-learning-rice/blob/main/notebooks/Bab10_Rice_Statistical_ML.ipynb
 ```
 
 Jangan mencetak URL sementara di atas dalam buku. Gunakan URL GitHub aktual atau permalink ke tag rilis `v1.0.0`.
